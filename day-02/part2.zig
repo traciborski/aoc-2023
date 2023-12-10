@@ -9,19 +9,20 @@ pub fn main() !void {
     var in_stream = buf_reader.reader();
     var buf: [1024]u8 = undefined;
 
-    const blue = 14;
-    const red = 12;
-    const green = 13;
-
     var sum: u32 = 0;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         var it = std.mem.split(u8, line, ":");
         var game_it = std.mem.split(u8, it.next().?, " ");
         _ = game_it.next(); // skip Game .
         const game = try std.fmt.parseInt(u32, game_it.next().?, 10);
+        _ = game;
 
         var sets_it = std.mem.split(u8, it.next().?, ";");
-        var ok = true;
+
+        var blue: u32 = 0;
+        var red: u32 = 0;
+        var green: u32 = 0;
+
         while (sets_it.next()) |x| {
             var colors_it = std.mem.split(u8, x, ",");
             while (colors_it.next()) |y| {
@@ -29,21 +30,21 @@ pub fn main() !void {
                 var values_it = std.mem.split(u8, trimmed, " ");
                 const value = try std.fmt.parseInt(u32, values_it.next().?, 10);
                 const color = values_it.next().?;
+
                 if (std.mem.eql(u8, color, "red")) {
                     if (value > red)
-                        ok = false;
+                        red = value;
                 } else if (std.mem.eql(u8, color, "green")) {
                     if (value > green)
-                        ok = false;
+                        green = value;
                 } else if (std.mem.eql(u8, color, "blue")) {
                     if (value > blue)
-                        ok = false;
+                        blue = value;
                 }
             }
         }
 
-        if (ok)
-            sum += game;
+        sum += red * blue * green;
     }
     std.debug.print("{d}\n", .{sum});
 }
